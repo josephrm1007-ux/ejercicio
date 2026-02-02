@@ -1,367 +1,146 @@
-import java.util.Locale;
+import java.util.ArrayList;
 import java.util.Scanner;
 
-public class ejercicio2 {
+enum Nivel {
+    ALTO, MEDIO, BAJO
+}
 
-    static class Estudiante {
-        String codigo;
-        String nombre;
-        double[] calificaciones;
-        int cantidadNotas;
+class Alumno {
+    private String id;
+    private String nombre;
+    private ArrayList<Double> notas;
 
-        Estudiante(String codigo, String nombre, int capacidadNotas) {
-            this.codigo = codigo;
-            this.nombre = nombre;
-            if (capacidadNotas < 3) capacidadNotas = 3; // mínimo 3
-            this.calificaciones = new double[capacidadNotas];
-            this.cantidadNotas = 0;
-        }
+    public Alumno(String id, String nombre) {
+        this.id = id;
+        this.nombre = nombre;
+        this.notas = new ArrayList<>();
+    }
 
-        void agregarCalificacion(double nota) {
-            if (nota < 0.0 || nota > 5.0) {
-                System.out.println("Nota inválida. Debe estar entre 0.0 y 5.0");
-                return;
-            }
-            if (cantidadNotas >= calificaciones.length) {
-                System.out.println("No se pueden agregar más notas a este estudiante (capacidad alcanzada).");
-                return;
-            }
-            calificaciones[cantidadNotas++] = nota;
-        }
+    public String getId() {
+        return id;
+    }
 
-        double promedio() {
-            if (cantidadNotas == 0) return 0.0;
-            double suma = 0.0;
-            for (int i = 0; i < cantidadNotas; i++) {
-                suma += calificaciones[i];
-            }
-            return suma / cantidadNotas;
-        }
-
-        double maxima() {
-            if (cantidadNotas == 0) return 0.0;
-            double max = calificaciones[0];
-            for (int i = 1; i < cantidadNotas; i++) {
-                if (calificaciones[i] > max) max = calificaciones[i];
-            }
-            return max;
-        }
-
-        double minima() {
-            if (cantidadNotas == 0) return 0.0;
-            double min = calificaciones[0];
-            for (int i = 1; i < cantidadNotas; i++) {
-                if (calificaciones[i] < min) min = calificaciones[i];
-            }
-            return min;
-        }
-
-        boolean aprobo() {
-            return promedio() >= 3.0;
-        }
-
-        String categoria() {
-            double p = promedio();
-            if (p >= 4.5) return "Excelente";
-            if (p >= 3.5) return "Bueno";
-            if (p >= 3.0) return "Aceptable";
-            return "Insuficiente";
-        }
-
-        public String toString() {
-            String prom = String.format(Locale.US, "%.2f", promedio());
-            String max = String.format(Locale.US, "%.2f", maxima());
-            String min = String.format(Locale.US, "%.2f", minima());
-            return "[" + codigo + "] " + nombre +
-                   " | Notas: " + cantidadNotas +
-                   " | Prom: " + prom +
-                   " | Max: " + max +
-                   " | Min: " + min +
-                   " | Estado: " + (aprobo() ? "Aprobado" : "Reprobado") +
-                   " | Categoria: " + categoria();
+    public void agregarNota(double n) {
+        if (n >= 0 && n <= 5) {
+            notas.add(n);
         }
     }
 
-    static class ReporteEstadistico {
-        public final double promedioGeneral;
-        public final Estudiante destacado;
-        public final int aprobados;
-        public final int reprobados;
-        public final int total;
-        public final int excelentes;
-        public final int buenos;
-        public final int aceptables;
-        public final int insuficientes;
-
-        public ReporteEstadistico(double promedioGeneral, Estudiante destacado, int aprobados, int reprobados,
-                                  int total, int excelentes, int buenos, int aceptables, int insuficientes) {
-            this.promedioGeneral = promedioGeneral;
-            this.destacado = destacado;
-            this.aprobados = aprobados;
-            this.reprobados = reprobados;
-            this.total = total;
-            this.excelentes = excelentes;
-            this.buenos = buenos;
-            this.aceptables = aceptables;
-            this.insuficientes = insuficientes;
+    public double promedio() {
+        if (notas.size() < 3) return 0;
+        double suma = 0;
+        for (double n : notas) {
+            suma += n;
         }
+        return suma / notas.size();
     }
 
-    static class GestorCurso {
-        Estudiante[] estudiantes;
-        int cantidad;
-
-        GestorCurso(int capacidad) {
-            if (capacidad < 1) capacidad = 1;
-            estudiantes = new Estudiante[capacidad];
-            cantidad = 0;
-        }
-
-        boolean agregarEstudiante(Estudiante e) {
-            if (e == null) return false;
-            if (cantidad >= estudiantes.length) {
-                System.out.println("Capacidad máxima de estudiantes alcanzada.");
-                return false;
-            }
-            // validar código único
-            if (buscarPorCodigo(e.codigo) != null) {
-                System.out.println("Ya existe un estudiante con el código " + e.codigo);
-                return false;
-            }
-            estudiantes[cantidad++] = e;
-            return true;
-        }
-
-        Estudiante buscarPorCodigo(String codigo) {
-            for (int i = 0; i < cantidad; i++) {
-                if (estudiantes[i].codigo.equalsIgnoreCase(codigo)) return estudiantes[i];
-            }
-            return null;
-        }
-
-        Estudiante[] listarEstudiantes() {
-            Estudiante[] copia = new Estudiante[cantidad];
-            for (int i = 0; i < cantidad; i++) copia[i] = estudiantes[i];
-            return copia;
-        }
-
-        double promedioGeneral() {
-            if (cantidad == 0) return 0.0;
-            double suma = 0.0;
-            for (int i = 0; i < cantidad; i++) {
-                suma += estudiantes[i].promedio();
-            }
-            return suma / cantidad;
-        }
-
-        Estudiante mejorPromedio() {
-            if (cantidad == 0) return null;
-            Estudiante mejor = estudiantes[0];
-            for (int i = 1; i < cantidad; i++) {
-                if (estudiantes[i].promedio() > mejor.promedio()) mejor = estudiantes[i];
-            }
-            return mejor;
-        }
-
-        int contarAprobados() {
-            int c = 0;
-            for (int i = 0; i < cantidad; i++) if (estudiantes[i].aprobo()) c++;
-            return c;
-        }
-
-        int contarReprobados() {
-            int c = 0;
-            for (int i = 0; i < cantidad; i++) if (!estudiantes[i].aprobo()) c++;
-            return c;
-        }
-
-        void ordenarPorPromedioDesc() {
-            // Burbuja descendente optimizada
-            if (cantidad < 2) return;
-            boolean intercambio;
-            int n = cantidad;
-            do {
-                intercambio = false;
-                for (int i = 0; i < n - 1; i++) {
-                    if (estudiantes[i].promedio() < estudiantes[i + 1].promedio()) {
-                        Estudiante tmp = estudiantes[i];
-                        estudiantes[i] = estudiantes[i + 1];
-                        estudiantes[i + 1] = tmp;
-                        intercambio = true;
-                    }
-                }
-                n--; // última posición ya está en su lugar
-            } while (intercambio);
-        }
-
-        ReporteEstadistico generarReporte() {
-            double promGen = promedioGeneral();
-            Estudiante top = mejorPromedio();
-            int aprob = contarAprobados();
-            int reprob = contarReprobados();
-            int total = cantidad;
-            int exc = 0, bue = 0, ace = 0, ins = 0;
-            for (int i = 0; i < cantidad; i++) {
-                String cat = estudiantes[i].categoria();
-                if ("Excelente".equals(cat)) exc++;
-                else if ("Bueno".equals(cat)) bue++;
-                else if ("Aceptable".equals(cat)) ace++;
-                else ins++;
-            }
-            return new ReporteEstadistico(promGen, top, aprob, reprob, total, exc, bue, ace, ins);
-        }
+    public boolean aprueba() {
+        return promedio() >= 3.0;
     }
 
-    // =====================
-    // Configuración y menú
-    // =====================
-    private static final int CAPACIDAD_ESTUDIANTES = 100;
-    private static final int CAPACIDAD_NOTAS_POR_ESTUDIANTE = 50; // mínimo 3 garantizado en el constructor
+    public Nivel nivel() {
+        double p = promedio();
+        if (p >= 4.5) return Nivel.ALTO;
+        if (p >= 3.0) return Nivel.MEDIO;
+        return Nivel.BAJO;
+    }
+
+    @Override
+    public String toString() {
+        return id + " - " + nombre +
+                " | Promedio: " + String.format("%.2f", promedio()) +
+                " | Estado: " + (aprueba() ? "Aprobado" : "Reprobado") +
+                " | Nivel: " + nivel();
+    }
+}
+
+public class ejercicio {
+
+    static ArrayList<Alumno> alumnos = new ArrayList<>();
 
     public static void main(String[] args) {
-        Locale.setDefault(Locale.US);
         Scanner sc = new Scanner(System.in);
-        GestorCurso gestor = new GestorCurso(CAPACIDAD_ESTUDIANTES);
+        int opcion;
 
-        boolean salir = false;
         do {
-            imprimirMenu();
-            int opcion = leerEntero(sc, "Seleccione una opción: ");
+            System.out.println("\n===== MENÚ =====");
+            System.out.println("1. Registrar estudiante");
+            System.out.println("2. Agregar notas");
+            System.out.println("3. Mostrar estudiantes");
+            System.out.println("4. Ver estadísticas");
+            System.out.println("5. Salir");
+            System.out.print("Seleccione opción: ");
+            opcion = sc.nextInt();
+            sc.nextLine();
+
             switch (opcion) {
-                case 1:
-                    agregarEstudiante(sc, gestor);
-                    break;
-                case 2:
-                    registrarCalificaciones(sc, gestor);
-                    break;
-                case 3:
-                    mostrarListado(gestor);
-                    break;
-                case 4:
-                    gestor.ordenarPorPromedioDesc();
-                    System.out.println("Estudiantes ordenados por promedio (descendente).");
-                    break;
-                case 5:
-                    generarYMostrarReporte(gestor);
-                    break;
-                case 6:
-                    salir = true;
-                    System.out.println("Saliendo...");
-                    break;
-                default:
-                    System.out.println("Opción inválida. Intente de nuevo.");
+                case 1 -> registrar(sc);
+                case 2 -> registrarNotas(sc);
+                case 3 -> mostrar();
+                case 4 -> estadisticas();
+                case 5 -> System.out.println("Programa finalizado.");
+                default -> System.out.println("Opción inválida.");
             }
-            System.out.println();
-        } while (!salir);
+        } while (opcion != 5);
 
         sc.close();
     }
 
-    private static void imprimirMenu() {
-        System.out.println("===== MENÚ PRINCIPAL =====");
-        System.out.println("1. Agregar estudiante");
-        System.out.println("2. Registrar calificaciones");
-        System.out.println("3. Mostrar listado completo");
-        System.out.println("4. Ordenar estudiantes por promedio (desc)");
-        System.out.println("5. Generar reporte estadístico");
-        System.out.println("6. Salir");
-    }
-
-    private static void agregarEstudiante(Scanner sc, GestorCurso gestor) {
+    static void registrar(Scanner sc) {
         System.out.print("Código: ");
-        String codigo = sc.nextLine().trim();
-        if (codigo.isEmpty()) {
-            System.out.println("El código no puede estar vacío.");
-            return;
-        }
-        if (gestor.buscarPorCodigo(codigo) != null) {
-            System.out.println("Ya existe un estudiante con ese código.");
-            return;
-        }
+        String id = sc.nextLine();
         System.out.print("Nombre: ");
-        String nombre = sc.nextLine().trim();
-        if (nombre.isEmpty()) {
-            System.out.println("El nombre no puede estar vacío.");
+        String nombre = sc.nextLine();
+        alumnos.add(new Alumno(id, nombre));
+        System.out.println("Estudiante registrado correctamente.");
+    }
+
+    static void registrarNotas(Scanner sc) {
+        System.out.print("Código del estudiante: ");
+        String id = sc.nextLine();
+        Alumno a = buscar(id);
+
+        if (a == null) {
+            System.out.println("Estudiante no encontrado.");
             return;
         }
 
-        Estudiante e = new Estudiante(codigo, nombre, CAPACIDAD_NOTAS_POR_ESTUDIANTE);
-        if (gestor.agregarEstudiante(e)) {
-            System.out.println("Estudiante agregado correctamente.");
-        }
+        double nota;
+        do {
+            System.out.print("Ingrese nota (-1 para salir): ");
+            nota = sc.nextDouble();
+            if (nota != -1) a.agregarNota(nota);
+        } while (nota != -1);
+
+        sc.nextLine();
     }
 
-    private static void registrarCalificaciones(Scanner sc, GestorCurso gestor) {
-        System.out.print("Ingrese código del estudiante: ");
-        String codigo = sc.nextLine().trim();
-        Estudiante e = gestor.buscarPorCodigo(codigo);
-        if (e == null) {
-            System.out.println("No se encontró el estudiante con código " + codigo);
-            return;
+    static Alumno buscar(String id) {
+        for (Alumno a : alumnos) {
+            if (a.getId().equals(id)) return a;
         }
-        System.out.println("Registrando notas para: " + e.nombre + " (actual: " + e.cantidadNotas + "/" + e.calificaciones.length + ")");
-
-        boolean continuar = true;
-        while (continuar) {
-            System.out.print("Ingrese nota (0.0 a 5.0) o -1 para terminar: ");
-            String linea = sc.nextLine().trim();
-            double nota;
-            try {
-                nota = Double.parseDouble(linea);
-            } catch (NumberFormatException ex) {
-                System.out.println("Entrada inválida. Intente de nuevo.");
-                continue;
-            }
-            if (nota == -1) {
-                continuar = false;
-            } else {
-                e.agregarCalificacion(nota);
-                if (e.cantidadNotas >= e.calificaciones.length) {
-                    System.out.println("Capacidad de notas alcanzada para este estudiante.");
-                    continuar = false;
-                }
-            }
-        }
+        return null;
     }
 
-    private static void mostrarListado(GestorCurso gestor) {
-        Estudiante[] lista = gestor.listarEstudiantes();
-        if (lista.length == 0) {
+    static void mostrar() {
+        if (alumnos.isEmpty()) {
             System.out.println("No hay estudiantes registrados.");
             return;
         }
-        System.out.println("===== LISTADO DE ESTUDIANTES =====");
-        for (int i = 0; i < lista.length; i++) {
-            System.out.println((i + 1) + ". " + lista[i]);
+        for (Alumno a : alumnos) {
+            System.out.println(a);
         }
     }
 
-    private static void generarYMostrarReporte(GestorCurso gestor) {
-        ReporteEstadistico r = gestor.generarReporte();
-        System.out.println("===== REPORTE ESTADÍSTICO =====");
-        System.out.println("Total estudiantes: " + r.total);
-        System.out.println("Promedio general: " + String.format(Locale.US, "%.2f", r.promedioGeneral));
-        System.out.println("Aprobados: " + r.aprobados + ", Reprobados: " + r.reprobados);
-        System.out.println("- Excelentes: " + r.excelentes);
-        System.out.println("- Buenos: " + r.buenos);
-        System.out.println("- Aceptables: " + r.aceptables);
-        System.out.println("- Insuficientes: " + r.insuficientes);
-        if (r.destacado != null) {
-            System.out.println("Estudiante destacado: " + r.destacado.nombre + " (" + r.destacado.codigo + ") con promedio " + String.format(Locale.US, "%.2f", r.destacado.promedio()));
-        } else {
-            System.out.println("Estudiante destacado: N/A");
+    static void estadisticas() {
+        int aprobados = 0;
+        for (Alumno a : alumnos) {
+            if (a.aprueba()) aprobados++;
         }
-    }
 
-    private static int leerEntero(Scanner sc, String prompt) {
-        while (true) {
-            System.out.print(prompt);
-            String s = sc.nextLine().trim();
-            try {
-                return Integer.parseInt(s);
-            } catch (NumberFormatException ex) {
-                System.out.println("Entrada inválida. Intente de nuevo.");
-            }
-        }
+        System.out.println("Total estudiantes: " + alumnos.size());
+        System.out.println("Aprobados: " + aprobados);
+        System.out.println("Reprobados: " + (alumnos.size() - aprobados));
     }
 }
