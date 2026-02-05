@@ -6,9 +6,10 @@ enum Nivel {
 }
 
 class Alumno {
-    private String id;
-    private String nombre;
-    private ArrayList<Double> notas;
+
+    private final String id;
+    private final String nombre;
+    private final ArrayList<Double> notas;
 
     public Alumno(String id, String nombre) {
         this.id = id;
@@ -28,6 +29,7 @@ class Alumno {
 
     public double promedio() {
         if (notas.size() < 3) return 0;
+
         double suma = 0;
         for (double n : notas) {
             suma += n;
@@ -55,36 +57,50 @@ class Alumno {
     }
 }
 
-public class ejercicio {
+class ejercicio {
 
     static ArrayList<Alumno> alumnos = new ArrayList<>();
 
     public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        int opcion;
 
-        do {
-            System.out.println("\n===== MENÚ =====");
-            System.out.println("1. Registrar estudiante");
-            System.out.println("2. Agregar notas");
-            System.out.println("3. Mostrar estudiantes");
-            System.out.println("4. Ver estadísticas");
-            System.out.println("5. Salir");
-            System.out.print("Seleccione opción: ");
-            opcion = sc.nextInt();
-            sc.nextLine();
+        try (Scanner sc = new Scanner(System.in)) {
 
-            switch (opcion) {
-                case 1 -> registrar(sc);
-                case 2 -> registrarNotas(sc);
-                case 3 -> mostrar();
-                case 4 -> estadisticas();
-                case 5 -> System.out.println("Programa finalizado.");
-                default -> System.out.println("Opción inválida.");
-            }
-        } while (opcion != 5);
+            int opcion;
 
-        sc.close();
+            do {
+                System.out.println("\n===== MENÚ =====");
+                System.out.println("1. Registrar estudiante");
+                System.out.println("2. Agregar notas");
+                System.out.println("3. Mostrar estudiantes");
+                System.out.println("4. Ver estadísticas");
+                System.out.println("5. Salir");
+                System.out.print("Seleccione opción: ");
+
+                opcion = sc.nextInt();
+                sc.nextLine();
+
+                switch (opcion) {
+                    case 1:
+                        registrar(sc);
+                        break;
+                    case 2:
+                        registrarNotas(sc);
+                        break;
+                    case 3:
+                        mostrar();
+                        break;
+                    case 4:
+                        estadisticas();
+                        break;
+                    case 5:
+                        System.out.println("Programa finalizado.");
+                        break;
+                    default:
+                        System.out.println("Opción inválida.");
+                }
+
+            } while (opcion != 5);
+        }
     }
 
     static void registrar(Scanner sc) {
@@ -92,6 +108,7 @@ public class ejercicio {
         String id = sc.nextLine();
         System.out.print("Nombre: ");
         String nombre = sc.nextLine();
+
         alumnos.add(new Alumno(id, nombre));
         System.out.println("Estudiante registrado correctamente.");
     }
@@ -99,6 +116,7 @@ public class ejercicio {
     static void registrarNotas(Scanner sc) {
         System.out.print("Código del estudiante: ");
         String id = sc.nextLine();
+
         Alumno a = buscar(id);
 
         if (a == null) {
@@ -110,7 +128,9 @@ public class ejercicio {
         do {
             System.out.print("Ingrese nota (-1 para salir): ");
             nota = sc.nextDouble();
-            if (nota != -1) a.agregarNota(nota);
+            if (nota != -1) {
+                a.agregarNota(nota);
+            }
         } while (nota != -1);
 
         sc.nextLine();
@@ -118,7 +138,9 @@ public class ejercicio {
 
     static Alumno buscar(String id) {
         for (Alumno a : alumnos) {
-            if (a.getId().equals(id)) return a;
+            if (a.getId().equals(id)) {
+                return a;
+            }
         }
         return null;
     }
@@ -128,6 +150,7 @@ public class ejercicio {
             System.out.println("No hay estudiantes registrados.");
             return;
         }
+
         for (Alumno a : alumnos) {
             System.out.println(a);
         }
@@ -135,8 +158,11 @@ public class ejercicio {
 
     static void estadisticas() {
         int aprobados = 0;
+
         for (Alumno a : alumnos) {
-            if (a.aprueba()) aprobados++;
+            if (a.aprueba()) {
+                aprobados++;
+            }
         }
 
         System.out.println("Total estudiantes: " + alumnos.size());
